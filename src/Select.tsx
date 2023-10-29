@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo} from "react";
+import React, {useEffect, useState} from "react";
 
 export interface Option {
     value: string | number,
