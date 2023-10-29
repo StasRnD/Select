@@ -6,15 +6,19 @@ import {Option} from './Select'
 const options: Option[] = [
     {
         value: 1,
-        label: 'Вариант 1'
+        label: 'Мама 27лет'
     },
     {
         value: 2,
-        label: 'Вариант 2'
+        label: 'Папа 30лет'
     },
     {
         value: 3,
-        label: 'Вариант 3'
+        label: 'Сын 4года'
+    },
+    {
+        value: 4,
+        label: 'Сын 2года'
     }
 ]
 function App() {
@@ -23,7 +27,7 @@ function App() {
 
     return (
         <div className="App">
-            <Select value={selectValue} onChange={handleChange} options={options}/>
+            <Select value={selectValue} onChange={handleChange} options={options} search/>
         </div>
     );
 }
