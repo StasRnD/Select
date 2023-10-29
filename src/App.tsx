@@ -1,10 +1,7 @@
 import {Select} from "./Select";
 import React, {useState} from 'react'
+import {Option} from './Select'
 
-export interface Option {
-    value: string | number,
-    label: string,
-}
 
 const options: Option[] = [
     {
@@ -21,12 +18,12 @@ const options: Option[] = [
     }
 ]
 function App() {
-    const [selectValue, setSelectValue] = useState({} as Option)
-    const handleChange = (value: Option) => setSelectValue(value)
+    const [selectValue, setSelectValue] = useState<Option['value'] | null>(null)
+    const handleChange = (value: Option['value'] | null) => setSelectValue(value)
 
     return (
         <div className="App">
-            <Select selectValue={selectValue} onChange={handleChange} options={options}/>
+            <Select value={selectValue} onChange={handleChange} options={options}/>
         </div>
     );
 }
