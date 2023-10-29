@@ -7,7 +7,7 @@ export interface Option {
 
 interface SelectProps {
     value: Option['value'] | null
-    onChange: (value: SelectProps['value']) => void
+    onChange: (value: Option['value']) => void
     options: Option[]
 }
 
@@ -28,7 +28,7 @@ export const Select: React.FC<SelectProps> = ({value, onChange, options}) => {
                     {options.map((option) => {
                         const handleSelectChange = () => {
                             onChange(option.value)
-                            setOpen(!open)
+                            openDropdownToggle()
                         }
 
                         return <div onClick={handleSelectChange}
