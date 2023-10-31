@@ -10,7 +10,7 @@ interface SelectProps<T> {
     onChange: (value: T) => void
     options: T[]
     search?: boolean;
-    getLabel: (value: T) => string
+    getLabel?: (value: T) => string
 }
 
 
@@ -24,15 +24,16 @@ export const Select = <T extends Record<keyof Option, string | number>>(props: S
     const [open, setOpen] = useState<boolean>(false)
     const [inputValue, setInputValue] = useState<string>('')
     const handleInputChange = (evt: React.ChangeEvent<HTMLInputElement>) => setInputValue(evt.target.value)
+    const searchLabel = (option: T): string => getLabel ? getLabel(option) : String(option.label)
 
     useEffect(() => {
         setInputValue('')
     }, [open])
 
-    const filterOptions = useMemo(()=>{
+    const filterOptions = useMemo(() => {
         return !search ? options : options
             .filter((option) => {
-                return toLowerCaseAndTrim(getLabel(option)).includes(toLowerCaseAndTrim(inputValue))
+                return toLowerCaseAndTrim(searchLabel(option)).includes(toLowerCaseAndTrim(inputValue))
             })
     }, [search, inputValue])
 
@@ -50,7 +51,6 @@ export const Select = <T extends Record<keyof Option, string | number>>(props: S
             {open &&
                 <div className={'absolute top-full mt-3 w-full flex flex-col gap-y-3 border p-2 rounded-lg'}>
                     {filterOptions.length ? filterOptions.map((option) => {
-                        console.log(getLabel(option))
                         const handleSelectChange = () => {
                             onChange(option)
                             openDropdownToggle()
@@ -58,7 +58,7 @@ export const Select = <T extends Record<keyof Option, string | number>>(props: S
                         return (
                             <div onClick={handleSelectChange} key={option.value}
                                  className={'bg-amber-400 p-2 rounded-lg cursor-pointer hover:bg-amber-600'}>
-                                <span>{getLabel(option)}</span>
+                                <span>{searchLabel(option)}</span>
                             </div>
                         )
                     }) : <p>Ничего не найдено</p>
