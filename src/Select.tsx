@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useMemo} from "react";
 
 export interface Option {
     value: string | number,
@@ -28,10 +28,12 @@ export const Select: React.FC<SelectProps> = (props) => {
         setInputValue('')
     }, [open])
 
-    const filterOptions = options
-        .filter((option) => {
-            return toLowerCaseAndTrim(option.label).includes(toLowerCaseAndTrim(inputValue))
-        })
+    const filterOptions = useMemo(()=>{
+        return !search ? options : options
+            .filter((option) => {
+                return toLowerCaseAndTrim(option.label).includes(toLowerCaseAndTrim(inputValue))
+            })
+    }, [search, inputValue])
 
 
     return (
