@@ -3,7 +3,13 @@ import React, {useState} from 'react'
 import {Option} from './Select'
 
 
-const options: Option[] = [
+interface UserOption {
+    value: number,
+    label: string
+
+}
+
+const options: UserOption[] = [
     {
         value: 1,
         label: 'Мама 27лет'
@@ -22,8 +28,8 @@ const options: Option[] = [
     }
 ]
 function App() {
-    const [selectValue, setSelectValue] = useState<Option['value'] | null>(null)
-    const handleChange = (value: Option['value'] | null) => setSelectValue(value)
+    const [selectValue, setSelectValue] = useState<UserOption | null>(null)
+    const handleChange = (value: UserOption | null) => setSelectValue(value)
 
     return (
         <div className="App">

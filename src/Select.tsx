@@ -5,10 +5,10 @@ export interface Option {
     label: string,
 }
 
-interface SelectProps {
-    value: Option['value'] | null
-    onChange: (value: Option['value']) => void
-    options: Option[]
+interface SelectProps<T> {
+    value: T | null
+    onChange: (value: T) => void
+    options: T[]
     search?: boolean;
 }
 
@@ -16,10 +16,10 @@ interface SelectProps {
 const toLowerCaseAndTrim = (value: string): string => {
     return value.toLowerCase().trim()
 }
-export const Select: React.FC<SelectProps> = (props) => {
+export const Select = <T extends Option>(props: SelectProps<T>) => {
     const {value, onChange, options, search} = props
     const openDropdownToggle = () => setOpen(!open)
-    const selectOption = options.find(option => option.value === value)
+    const selectOption = options.find(option => option === value)
     const [open, setOpen] = useState<boolean>(false)
     const [inputValue, setInputValue] = useState<string>('')
     const handleInputChange = (evt: React.ChangeEvent<HTMLInputElement>) => setInputValue(evt.target.value)
@@ -50,7 +50,7 @@ export const Select: React.FC<SelectProps> = (props) => {
                 <div className={'absolute top-full mt-3 w-full flex flex-col gap-y-3 border p-2 rounded-lg'}>
                     {filterOptions.length ? filterOptions.map((option) => {
                         const handleSelectChange = () => {
-                            onChange(option.value)
+                            onChange(option)
                             openDropdownToggle()
                         }
                         return (
