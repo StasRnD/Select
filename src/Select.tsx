@@ -10,14 +10,15 @@ interface SelectProps<T> {
     onChange: (value: T) => void
     options: T[]
     search?: boolean;
+    getLabel: (value: T) => string
 }
 
 
 const toLowerCaseAndTrim = (value: string): string => {
     return value.toLowerCase().trim()
 }
-export const Select = <T extends Option>(props: SelectProps<T>) => {
-    const {value, onChange, options, search} = props
+export const Select = <T extends Record<keyof Option, string | number>>(props: SelectProps<T>) => {
+    const {value, onChange, options, search, getLabel} = props
     const openDropdownToggle = () => setOpen(!open)
     const selectOption = options.find(option => option === value)
     const [open, setOpen] = useState<boolean>(false)
@@ -31,7 +32,7 @@ export const Select = <T extends Option>(props: SelectProps<T>) => {
     const filterOptions = useMemo(()=>{
         return !search ? options : options
             .filter((option) => {
-                return toLowerCaseAndTrim(option.label).includes(toLowerCaseAndTrim(inputValue))
+                return toLowerCaseAndTrim(getLabel(option)).includes(toLowerCaseAndTrim(inputValue))
             })
     }, [search, inputValue])
 
@@ -49,6 +50,7 @@ export const Select = <T extends Option>(props: SelectProps<T>) => {
             {open &&
                 <div className={'absolute top-full mt-3 w-full flex flex-col gap-y-3 border p-2 rounded-lg'}>
                     {filterOptions.length ? filterOptions.map((option) => {
+                        console.log(getLabel(option))
                         const handleSelectChange = () => {
                             onChange(option)
                             openDropdownToggle()
@@ -56,7 +58,7 @@ export const Select = <T extends Option>(props: SelectProps<T>) => {
                         return (
                             <div onClick={handleSelectChange} key={option.value}
                                  className={'bg-amber-400 p-2 rounded-lg cursor-pointer hover:bg-amber-600'}>
-                                <span>{option.label}</span>
+                                <span>{getLabel(option)}</span>
                             </div>
                         )
                     }) : <p>Ничего не найдено</p>

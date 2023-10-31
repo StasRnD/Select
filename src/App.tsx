@@ -1,18 +1,21 @@
 import {Select} from "./Select";
 import React, {useState} from 'react'
-import {Option} from './Select'
+
+
 
 
 interface UserOption {
     value: number,
     label: string
+    user?: string
 
 }
 
 const options: UserOption[] = [
     {
         value: 1,
-        label: 'Мама 27лет'
+        label: 'Мама 27лет',
+        user: 'Stas'
     },
     {
         value: 2,
@@ -27,13 +30,18 @@ const options: UserOption[] = [
         label: 'Сын 2года'
     }
 ]
+
+
+
+
 function App() {
     const [selectValue, setSelectValue] = useState<UserOption | null>(null)
     const handleChange = (value: UserOption | null) => setSelectValue(value)
+    const getLabel = (userOption:UserOption) => userOption.label
 
     return (
         <div className="App">
-            <Select value={selectValue} onChange={handleChange} options={options} search/>
+            <Select value={selectValue} getLabel={getLabel} onChange={handleChange} options={options} search/>
         </div>
     );
 }
