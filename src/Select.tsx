@@ -61,9 +61,21 @@ export const Select = <T = Option>(props: SelectProps<T>) => {
                  className={`flex gap-y-2 border rounded-lg hover:border-blue-600 cursor-pointer ${open && 'outline outline-2 outline-blue-400'}`}>
 
                 {search ? <input onClick={(evt: React.MouseEvent<HTMLInputElement>) => open && evt.stopPropagation()}
-                                 className={'focus:outline-0 grow p-2 rounded-lg'} value={inputValue} onChange={handleInputChange}
-                                 placeholder={'Поиск...'}/> : <span className={'p-2 rounded-lg'}>{findLabel(value) || 'Выбирай'}</span>}
-                <button className={'ml-auto bg-transparent border-l-2 px-4 rounded-r-lg hover:bg-blue-400 hover:text-white'}>открыть dropdown</button>
+                                 className={'focus:outline-0 grow p-2 rounded-lg'} value={inputValue}
+                                 onChange={handleInputChange}
+                                 placeholder={'Поиск...'}/> :
+                    <span className={'p-2 rounded-lg'}>{findLabel(value) || 'Выбирай'}</span>}
+                {value &&
+                    <button className={'ml-auto bg-transparent border-l-2 px-4 hover:bg-blue-400 hover:text-white'}
+                            onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+                                evt.stopPropagation()
+                                onChange(null)
+                            }}>Вытереть значение</button>}
+
+                <button
+                    className={'ml-auto bg-transparent border-l-2 px-4 rounded-r-lg hover:bg-blue-400 hover:text-white'}>открыть
+                    dropdown
+                </button>
             </div>
 
             {open &&
