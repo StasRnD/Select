@@ -29,7 +29,7 @@ export const Select = <T = Option>(props: SelectProps<T>) => {
         if (typeof option === 'object' && option !== null && 'label' in option) {
             return String(option.label)
         } else {
-            throw new Error('нет Option')
+            throw Error('нет Option')
         }
     }
     const findLabel = (option: T | null): string => getLabel ? getLabel(option) : checkLabel(option)
