@@ -20,18 +20,21 @@ const toLowerCaseAndTrim = (value: string): string => {
 export const Select = <T = Option>(props: SelectProps<T>) => {
     const {value, onChange, options, search, getLabel} = props
     const openDropdownToggle = () => setOpen(!open)
-    const selectOption = options.find(option => option === value)
     const [open, setOpen] = useState<boolean>(false)
     const [inputValue, setInputValue] = useState<string>('')
     const handleInputChange = (evt: React.ChangeEvent<HTMLInputElement>) => setInputValue(evt.target.value)
 
     function checkLabel<T>(option: T): string {
-        if (typeof option === 'object' && option !== null && 'label' in option) {
-            return String(option.label)
-        } else {
-            throw Error('нет Option')
+        if (option === null) {
+            return ''
         }
+        if (typeof option === 'object' && 'label' in option) {
+            return String(option.label)
+        }
+        throw Error('нет Option')
+
     }
+
     const findLabel = (option: T | null): string => getLabel ? getLabel(option) : checkLabel(option)
 
     useEffect(() => {

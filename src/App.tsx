@@ -29,11 +29,13 @@ function App() {
     const [selectValue, setSelectValue] = useState<UserOption | null>(null)
     const handleChange = (value: UserOption | null) => setSelectValue(value)
     const getLabel = (userOption: UserOption | null) => {
-        if (userOption !== null) {
-            return userOption.name
-        } else {
-            throw Error('Ошибка')
+        if (userOption === null) {
+            return '';
         }
+        if (!!userOption) {
+            return userOption.name;
+        }
+        throw new Error('Ошибка');
     }
 
     return (
