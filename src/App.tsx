@@ -1,43 +1,34 @@
 import {Select} from "./Select";
 import React, {useState} from 'react'
 
-
-
-
 interface UserOption {
-    value: number,
-    label: string
-    user?: string
-
+    id: number,
+    name: string
 }
 
 const options: UserOption[] = [
     {
-        value: 1,
-        label: 'Мама 27лет',
-        user: 'Stas'
+        id: 1,
+        name: 'Stas'
     },
     {
-        value: 2,
-        label: 'Папа 30лет'
+        id: 2,
+        name: 'Папа 30лет'
     },
     {
-        value: 3,
-        label: 'Сын 4года'
+        id: 3,
+        name: 'Сын 4года'
     },
     {
-        value: 4,
-        label: 'Сын 2года'
+        id: 4,
+        name: 'Сын 2года'
     }
 ]
-
-
-
 
 function App() {
     const [selectValue, setSelectValue] = useState<UserOption | null>(null)
     const handleChange = (value: UserOption | null) => setSelectValue(value)
-    const getLabel = (userOption:UserOption) => userOption.label
+    const getLabel = (userOption:UserOption | null) => userOption.name
 
     return (
         <div className="App">

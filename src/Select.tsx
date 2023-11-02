@@ -10,21 +10,29 @@ interface SelectProps<T> {
     onChange: (value: T) => void
     options: T[]
     search?: boolean;
-    getLabel?: (value: T) => string
+    getLabel?: (value: T | null) => string
 }
 
 
 const toLowerCaseAndTrim = (value: string): string => {
     return value.toLowerCase().trim()
 }
-export const Select = <T extends Record<keyof Option, string | number>>(props: SelectProps<T>) => {
+export const Select = <T = Option>(props: SelectProps<T>) => {
     const {value, onChange, options, search, getLabel} = props
     const openDropdownToggle = () => setOpen(!open)
     const selectOption = options.find(option => option === value)
     const [open, setOpen] = useState<boolean>(false)
     const [inputValue, setInputValue] = useState<string>('')
     const handleInputChange = (evt: React.ChangeEvent<HTMLInputElement>) => setInputValue(evt.target.value)
-    const searchLabel = (option: T): string => getLabel ? getLabel(option) : String(option.label)
+
+    function checkLabel<T>(option: T): string {
+        if (typeof option === 'object' && option !== null && 'label' in option) {
+            return String(option.label)
+        } else {
+            throw new Error('нет Option')
+        }
+    }
+    const findLabel = (option: T | null): string => getLabel ? getLabel(option) : checkLabel(option)
 
     useEffect(() => {
         setInputValue('')
@@ -33,7 +41,7 @@ export const Select = <T extends Record<keyof Option, string | number>>(props: S
     const filterOptions = useMemo(() => {
         return !search ? options : options
             .filter((option) => {
-                return toLowerCaseAndTrim(searchLabel(option)).includes(toLowerCaseAndTrim(inputValue))
+                return toLowerCaseAndTrim(findLabel(option)).includes(toLowerCaseAndTrim(inputValue))
             })
     }, [search, inputValue])
 
@@ -42,7 +50,7 @@ export const Select = <T extends Record<keyof Option, string | number>>(props: S
         <div className={'flex flex-col gap-x-y relative'}>
             <div onClick={openDropdownToggle}
                  className={`flex flex-col gap-y-2 border p-2 rounded-lg hover:border-blue-600 cursor-pointer ${open && 'outline outline-2 outline-blue-400'}`}>
-                <span>{selectOption?.label || 'Выбирай'}</span>
+                <span>{findLabel(value) || 'Выбирай'}</span>
                 {search && open && <input onClick={(evt: React.MouseEvent<HTMLInputElement>) => evt.stopPropagation()}
                                           className={'focus:outline-0'} value={inputValue} onChange={handleInputChange}
                                           placeholder={'Поиск...'}/>}
@@ -56,9 +64,9 @@ export const Select = <T extends Record<keyof Option, string | number>>(props: S
                             openDropdownToggle()
                         }
                         return (
-                            <div onClick={handleSelectChange} key={option.value}
+                            <div onClick={handleSelectChange}
                                  className={'bg-amber-400 p-2 rounded-lg cursor-pointer hover:bg-amber-600'}>
-                                <span>{searchLabel(option)}</span>
+                                <span>{findLabel(option)}</span>
                             </div>
                         )
                     }) : <p>Ничего не найдено</p>
