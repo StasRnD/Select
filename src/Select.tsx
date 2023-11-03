@@ -1,4 +1,5 @@
 import React, {useEffect, useState, useMemo, useRef} from "react";
+import {useOutsideClick} from './hooks'
 
 export interface Option {
     value: string | number,
@@ -40,7 +41,6 @@ export const Select = <T = Option>(props: SelectProps<T>) => {
             return String(option.label)
         }
         throw Error('нет Option')
-
     }
 
     const filterOptions = useMemo(() => {
@@ -50,20 +50,6 @@ export const Select = <T = Option>(props: SelectProps<T>) => {
             })
     }, [search, inputValue])
 
-    const useOutsideClick = (ref: React.RefObject<HTMLDivElement>, toggleDropdownOpen: (value: boolean) => void) => {
-        function handleOutsideClick(event: MouseEvent) {
-            if (ref.current && !ref.current.contains(event.target as Node)) {
-                toggleDropdownOpen(false)
-            }
-        }
-
-        useEffect(() => {
-            document.addEventListener('click', handleOutsideClick);
-            return () => {
-                document.removeEventListener("click", handleOutsideClick);
-            };
-        }, []);
-    }
 
     useEffect(() => {
         setInputValue(findLabel(value))
