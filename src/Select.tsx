@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo} from "react";
+import React, {useEffect, useState, useMemo, useRef} from "react";
 
 export interface Option {
     value: string | number,
@@ -19,6 +19,7 @@ const toLowerCaseAndTrim = (value: string): string => {
 }
 export const Select = <T = Option>(props: SelectProps<T>) => {
     const {value, onChange, options, search, getLabel} = props
+    const ref = useRef<HTMLDivElement>(null);
     const openDropdownToggle = () => setOpen(!open)
     const [open, setOpen] = useState<boolean>(false)
     const findLabel = (option: T | null): string => getLabel ? getLabel(option) : checkLabel(option)
@@ -41,10 +42,18 @@ export const Select = <T = Option>(props: SelectProps<T>) => {
         throw Error('нет Option')
 
     }
-
+    function handleOutsideClick(event: MouseEvent) {
+        if (ref.current && !ref.current.contains(event.target as Node)) {
+            setOpen(false)
+        }
+    }
 
     useEffect(() => {
         setInputValue(findLabel(value))
+        document.addEventListener('click', handleOutsideClick);
+        return () => {
+            document.removeEventListener("click", handleOutsideClick);
+        };
     }, [search, value])
 
     const filterOptions = useMemo(() => {
@@ -56,7 +65,7 @@ export const Select = <T = Option>(props: SelectProps<T>) => {
 
 
     return (
-        <div className={'flex flex-col gap-x-y relative'}>
+        <div ref={ref} className={'flex flex-col gap-x-y relative'} >
             <div onClick={openDropdownToggle}
                  className={`flex gap-y-2 border rounded-lg hover:border-blue-600 cursor-pointer ${open && 'outline outline-2 outline-blue-400'}`}>
 
@@ -73,8 +82,8 @@ export const Select = <T = Option>(props: SelectProps<T>) => {
                             }}>Вытереть значение</button>}
 
                 <button
-                    className={'ml-auto bg-transparent border-l-2 px-4 rounded-r-lg hover:bg-blue-400 hover:text-white'}>открыть
-                    dropdown
+                    className={'ml-auto bg-transparent border-l-2 px-4 rounded-r-lg hover:bg-blue-400 hover:text-white'}>
+                    {!open ? 'открыть dropdown' : 'закрыть dropdown'}
                 </button>
             </div>
 
