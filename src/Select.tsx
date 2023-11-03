@@ -42,19 +42,6 @@ export const Select = <T = Option>(props: SelectProps<T>) => {
         throw Error('нет Option')
 
     }
-    function handleOutsideClick(event: MouseEvent) {
-        if (ref.current && !ref.current.contains(event.target as Node)) {
-            setOpen(false)
-        }
-    }
-
-    useEffect(() => {
-        setInputValue(findLabel(value))
-        document.addEventListener('click', handleOutsideClick);
-        return () => {
-            document.removeEventListener("click", handleOutsideClick);
-        };
-    }, [search, value])
 
     const filterOptions = useMemo(() => {
         return !search || findLabel(value) === inputValue ? options : options
@@ -63,9 +50,29 @@ export const Select = <T = Option>(props: SelectProps<T>) => {
             })
     }, [search, inputValue])
 
+    const useOutsideClick = (ref: React.RefObject<HTMLDivElement>, toggleDropdownOpen: (value: boolean) => void) => {
+        function handleOutsideClick(event: MouseEvent) {
+            if (ref.current && !ref.current.contains(event.target as Node)) {
+                toggleDropdownOpen(false)
+            }
+        }
+
+        useEffect(() => {
+            document.addEventListener('click', handleOutsideClick);
+            return () => {
+                document.removeEventListener("click", handleOutsideClick);
+            };
+        }, []);
+    }
+
+    useEffect(() => {
+        setInputValue(findLabel(value))
+    }, [search, value])
+
+    useOutsideClick(ref, setOpen)
 
     return (
-        <div ref={ref} className={'flex flex-col gap-x-y relative'} >
+        <div ref={ref} className={'flex flex-col gap-x-y relative'}>
             <div onClick={openDropdownToggle}
                  className={`flex gap-y-2 border rounded-lg hover:border-blue-600 cursor-pointer ${open && 'outline outline-2 outline-blue-400'}`}>
 
