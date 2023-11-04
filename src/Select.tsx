@@ -55,7 +55,7 @@ export const Select = <T = Option>(props: SelectProps<T>) => {
         setInputValue(findLabel(value))
     }, [search, value])
 
-    useOutsideClick(ref, setOpen)
+    useOutsideClick(ref, openDropdownToggle)
 
     return (
         <div ref={ref} className={'flex flex-col gap-x-y relative'}>
