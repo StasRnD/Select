@@ -26,8 +26,11 @@ const options: UserOption[] = [
 ]
 
 function App() {
-    const [selectValue, setSelectValue] = useState<UserOption | null>(null)
-    const handleChange = (value: UserOption | null) => setSelectValue(value)
+    const [selectValue, setSelectValue] = useState<UserOption | null | any>({
+        id: 3,
+        name: 'Сын 4года'
+    })
+
     const getLabel = (userOption: UserOption | null) => {
         if (userOption === null) {
             return '';
@@ -40,7 +43,7 @@ function App() {
 
     return (
         <div className="App">
-            <Select value={selectValue} getLabel={getLabel} onChange={handleChange} options={options} search/>
+            <Select value={selectValue} getLabel={getLabel} onChange={setSelectValue} options={options} search/>
         </div>
     );
 }
