@@ -9,12 +9,15 @@ import { useOutsideClick } from "./hooks";
 import { SelectOption } from "./components/SelectOption";
 import { SelectChipWrapper } from "./components/SelectChipWrapper";
 import { SelectChip } from "./components/SelectChip";
+import { SelectOptionProps } from "./model";
 
 type SelectProps<T> = {
   options: T[];
   search?: boolean;
   getLabel?: (value: T | null) => string;
   getValue?: (value: T | null) => string | number;
+  customOption?: React.FC<SelectOptionProps & T>;
+  clearOptions?: boolean;
 } & (
   | {
       multiple: true;
@@ -34,8 +37,18 @@ const toLowerCaseAndTrim = (value: string): string => {
 export const Select = <V, T = V extends V[] ? V[number] : V>(
   props: SelectProps<T>,
 ) => {
-  const { options, multiple, value, onChange, search, getLabel, getValue } =
-    props;
+  const {
+    options,
+    customOption,
+    multiple,
+    value,
+    onChange,
+    search,
+    getLabel,
+    getValue,
+    clearOptions,
+  } = props;
+
   const ref = useRef<HTMLDivElement>(null);
   const openDropdownToggle = () => setOpen((open) => !open);
   const [open, setOpen] = useState<boolean>(false);
@@ -110,7 +123,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   const activeOption = (option: T): boolean => {
     return multiple
       ? (allActiveOptions as (string | number)[]).includes(findValue(option))
-      : Boolean(findValue(option));
+      : findValue(option) === findValue(value);
   };
 
   //обработчик onChange в зависимости от того типа селекта(мульти или нет)
@@ -144,7 +157,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   }, [search, value, multiple, findLabel]);
 
   useOutsideClick(ref, () => setOpen(false));
-
+  const OptionComponent = customOption ?? SelectOption;
   return (
     <div ref={ref} className={"flex flex-col gap-x-y relative"}>
       <div
@@ -189,7 +202,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
           </SelectChipWrapper>
         )}
 
-        {(multiple ? !!value.length : value) && (
+        {(multiple ? !!value.length : value) && clearOptions && (
           <button
             className={
               "ml-auto bg-transparent border-l-2 px-4 hover:bg-blue-400 hover:text-white"
@@ -226,12 +239,14 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
                   openDropdownToggle();
                 }
               };
+
               return (
-                <SelectOption
+                <OptionComponent
                   onClick={handleSelectChange}
                   label={findLabel(option)}
                   multiple={multiple}
                   active={activeOption(option)}
+                  {...option}
                 />
               );
             })

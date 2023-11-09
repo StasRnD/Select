@@ -1,27 +1,28 @@
 import { Select } from "./Select";
 import React, { useState } from "react";
+import { CustomOption } from "./customOption";
 
 interface UserOption {
-  id: number;
-  name: string;
+  title: string;
+  description: string;
 }
 
 const options: UserOption[] = [
   {
-    id: 1,
-    name: "Stas",
+    title: "Школа 1",
+    description: "Описание школа 1",
   },
   {
-    id: 2,
-    name: "Папа 30лет",
+    title: "Школа 2",
+    description: "Описание школа 2",
   },
   {
-    id: 3,
-    name: "Сын 4года",
+    title: "Школа 3",
+    description: "Описание школа 3",
   },
   {
-    id: 4,
-    name: "Сын 2года",
+    title: "Школа 4",
+    description: "Описание школа 4",
   },
 ];
 
@@ -31,7 +32,7 @@ function App() {
     if (userOption === null) {
       return "";
     } else {
-      return userOption.name;
+      return userOption.title;
     }
   };
 
@@ -39,13 +40,14 @@ function App() {
     if (userOption === null) {
       return "";
     } else {
-      return userOption.id;
+      return userOption.description;
     }
   };
 
   return (
     <div className="App">
       <Select
+        customOption={(props) => <CustomOption {...props} />}
         value={selectValue}
         getLabel={getLabel}
         getValue={getValue}
