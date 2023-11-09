@@ -34,9 +34,10 @@ const toLowerCaseAndTrim = (value: string): string => {
 export const Select = <V, T = V extends V[] ? V[number] : V>(
   props: SelectProps<T>,
 ) => {
-  const { options, search, getLabel, getValue } = props;
+  const { options, multiple, value, onChange, search, getLabel, getValue } =
+    props;
   const ref = useRef<HTMLDivElement>(null);
-  const openDropdownToggle = () => setOpen(!open);
+  const openDropdownToggle = () => setOpen((open) => !open);
   const [open, setOpen] = useState<boolean>(false);
 
   const findLabel = useCallback(
@@ -52,16 +53,16 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   );
 
   const [inputValue, setInputValue] = useState<string>(
-    !props.multiple ? findLabel(props.value) : "",
+    !multiple ? findLabel(value) : "",
   );
   const handleInputChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    if (evt.target.value === "" && !props.multiple) {
-      props.onChange(null);
+    if (evt.target.value === "" && !multiple) {
+      onChange(null);
     }
     setInputValue(evt.target.value);
   };
 
-  function checkLabel<T>(option: T): string {
+  function checkLabel<T>(option: T | null): string {
     if (option === null) {
       return "";
     }
@@ -72,7 +73,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
     throw Error("нет Option");
   }
 
-  function checkValue<T>(option: T): number | string {
+  function checkValue<T>(option: T | null): number | string {
     if (option === null) {
       return "";
     }
@@ -84,32 +85,31 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   }
 
   const filterOptions = useMemo(() => {
-    return !search ||
-      findLabel(!props.multiple ? props.value : null) === inputValue
+    return !search || findLabel(!multiple ? value : null) === inputValue
       ? options
       : options.filter((option) => {
           return toLowerCaseAndTrim(findLabel(option)).includes(
             toLowerCaseAndTrim(inputValue),
           );
         });
-  }, [search, findLabel, props.multiple, props.value, inputValue, options]);
+  }, [search, findLabel, multiple, value, inputValue, options]);
 
   //Массив строк - лейблы выбранных options
-  const allActiveOption = useMemo(() => {
-    return props.multiple
-      ? props.value.reduce(
-          (acc: Array<string | number>, value: T) => {
+  const allActiveOptions = useMemo(() => {
+    return multiple
+      ? value.reduce(
+          (acc: (string | number)[], value: T) => {
             return [...acc, findValue(value)];
           },
-          [] as Array<string | number>,
+          [] as (string | number)[],
         )
       : null;
-  }, [findValue, props.multiple, props.value]);
+  }, [findValue, multiple, value]);
 
   //Ф-я возвращает true, если label переданного option есть в выбранных options (переменная allActiveOption)
   const activeOption = (option: T): boolean => {
-    return props.multiple
-      ? (allActiveOption as Array<string | number>).includes(findValue(option))
+    return multiple
+      ? (allActiveOptions as (string | number)[]).includes(findValue(option))
       : Boolean(findValue(option));
   };
 
@@ -117,31 +117,31 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   //Принимает option. Если мультиселект, то проверяем выбранный option или нет
   // Если выбран, то отфильтровываем value(удаляем данный option из выбранных), если не выбран, то добавляем в value(выбранные option)
   const handleChange = (option: T) => {
-    if (props.multiple) {
+    if (multiple) {
       if (activeOption(option)) {
-        props.onChange(
-          props.value.filter((el) => findLabel(el) !== findLabel(option)),
-        );
+        onChange(value.filter((el) => findValue(el) !== findValue(option)));
       } else {
-        props.onChange([...props.value, option]);
+        onChange([...value, option]);
       }
     } else {
-      props.onChange(option);
+      onChange(option);
     }
   };
 
   //Вытереть все опции
   const handleRemoveAllOptions = () => {
-    if (props.multiple) {
-      props.onChange([]);
+    if (multiple) {
+      onChange([]);
     } else {
-      props.onChange(null);
+      onChange(null);
     }
   };
 
   useEffect(() => {
-    !props.multiple && setInputValue(findLabel(props.value));
-  }, [search, props.value, props.multiple, findLabel]);
+    if (!multiple) {
+      setInputValue(findLabel(value));
+    }
+  }, [search, value, multiple, findLabel]);
 
   useOutsideClick(ref, () => setOpen(false));
 
@@ -153,7 +153,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
           open && "outline outline-2 outline-blue-400"
         }`}
       >
-        {!props.multiple &&
+        {!multiple &&
           (search ? (
             <input
               onClick={(evt: React.MouseEvent<HTMLInputElement>) =>
@@ -166,13 +166,13 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
             />
           ) : (
             <span className={"p-2 rounded-lg grow"}>
-              {findLabel(props.value) || "Выбирай"}
+              {findLabel(value) || "Выбирай"}
             </span>
           ))}
-        {props.multiple && (
+        {multiple && (
           <SelectChipWrapper viewCountChildren={2}>
-            {props.value.length ? (
-              props.value.map((el) => {
+            {value.length ? (
+              value.map((el) => {
                 return (
                   <SelectChip
                     label={findLabel(el)}
@@ -189,7 +189,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
           </SelectChipWrapper>
         )}
 
-        {(props.multiple ? !!props.value.length : props.value) && (
+        {(multiple ? !!value.length : value) && (
           <button
             className={
               "ml-auto bg-transparent border-l-2 px-4 hover:bg-blue-400 hover:text-white"
@@ -222,13 +222,15 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
             filterOptions.map((option) => {
               const handleSelectChange = () => {
                 handleChange(option);
-                !props.multiple && openDropdownToggle();
+                if (!multiple) {
+                  openDropdownToggle();
+                }
               };
               return (
                 <SelectOption
                   onClick={handleSelectChange}
                   label={findLabel(option)}
-                  multiple={props.multiple}
+                  multiple={multiple}
                   active={activeOption(option)}
                 />
               );

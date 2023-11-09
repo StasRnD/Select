@@ -30,21 +30,17 @@ function App() {
   const getLabel = (userOption: UserOption | null): string => {
     if (userOption === null) {
       return "";
-    }
-    if (!!userOption) {
+    } else {
       return userOption.name;
     }
-    throw new Error("Ошибка");
   };
 
   const getValue = (userOption: UserOption | null): string | number => {
     if (userOption === null) {
       return "";
-    }
-    if (!!userOption) {
+    } else {
       return userOption.id;
     }
-    throw new Error("Ошибка");
   };
 
   return (
