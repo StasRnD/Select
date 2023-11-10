@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import React from "react";
-import { SelectOptionProps } from "./model";
+import { SelectOptionProps } from "../model";
 
 interface CustomOptionProps {
   title: string;
@@ -22,7 +22,6 @@ export const CustomOption = (props: SelectOptionProps<CustomOptionProps>) => {
         <span>{item.title}</span>
         <span>{item.description}</span>
       </div>
-      <input type="checkbox" defaultChecked={false} checked={active} />
     </div>
   );
 };

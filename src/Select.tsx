@@ -7,9 +7,15 @@ import React, {
 } from "react";
 import { useOutsideClick } from "./hooks";
 import { SelectOption } from "./components/SelectOption";
-import { SelectChipWrapper } from "./components/SelectChipWrapper";
-import { SelectChip } from "./components/SelectChip";
-import { SelectOptionProps } from "./model";
+import {
+  SelectFieldMultipleProps,
+  SelectFieldSingleProps,
+  SelectOptionProps,
+} from "./model";
+import { checkValue, checkLabel } from "./utils";
+import { SingleSelect, MultiSelect } from "./model";
+import { SelectFieldMultiple } from "./components/SelectFieldMultiple";
+import { SelectFieldSingle } from "./components/SelectFieldSingle";
 
 type SelectProps<T> = {
   options: T[];
@@ -17,19 +23,10 @@ type SelectProps<T> = {
   getLabel?: (value: T | null) => string;
   getValue?: (value: T | null) => string | number;
   customOption?: React.FC<SelectOptionProps<T>>;
+  customSelectSingleField?: React.FC<SelectFieldSingleProps<T>>;
+  customSelectMultiField?: React.FC<SelectFieldMultipleProps<T>>;
   clearOptions?: boolean;
-} & (
-  | {
-      multiple: true;
-      value: T[];
-      onChange: (value: T[]) => void;
-    }
-  | {
-      multiple: false;
-      value: T | null;
-      onChange: (value: T | null) => void;
-    }
-);
+} & (SingleSelect<T> | MultiSelect<T>);
 
 const toLowerCaseAndTrim = (value: string): string => {
   return value.toLowerCase().trim();
@@ -47,6 +44,8 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
     getLabel,
     getValue,
     clearOptions,
+    customSelectSingleField,
+    customSelectMultiField,
   } = props;
 
   const ref = useRef<HTMLDivElement>(null);
@@ -74,28 +73,6 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
     }
     setInputValue(evt.target.value);
   };
-
-  function checkLabel<T>(option: T | null): string {
-    if (option === null) {
-      return "";
-    }
-    if (typeof option === "object" && "label" in option) {
-      return String(option.label);
-    }
-
-    throw Error("нет Option");
-  }
-
-  function checkValue<T>(option: T | null): number | string {
-    if (option === null) {
-      return "";
-    }
-    if (typeof option === "object" && "value" in option) {
-      return Number(option.value) || String(option.value);
-    }
-
-    throw Error("нет Option");
-  }
 
   const filterOptions = useMemo(() => {
     return !search || findLabel(!multiple ? value : null) === inputValue
@@ -157,75 +134,49 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   }, [search, value, multiple, findLabel]);
 
   useOutsideClick(ref, () => setOpen(false));
+
   const OptionComponent = customOption ?? SelectOption;
+
+  const SelectFieldSingleComponent =
+    customSelectSingleField ?? SelectFieldSingle;
+  const SelectFieldMultiComponent =
+    customSelectMultiField ?? SelectFieldMultiple;
+  console.log(!!customSelectSingleField);
   return (
     <div ref={ref} className={"flex flex-col gap-x-y relative"}>
-      <div
-        onClick={openDropdownToggle}
-        className={`flex gap-y-2 border rounded-lg hover:border-blue-600 cursor-pointer ${
-          open && "outline outline-2 outline-blue-400"
-        }`}
-      >
-        {!multiple &&
-          (search ? (
-            <input
-              defaultChecked={false}
-              onClick={(evt: React.MouseEvent<HTMLInputElement>) =>
-                open && evt.stopPropagation()
-              }
-              className={"focus:outline-0 grow p-2 rounded-lg"}
-              value={inputValue}
-              onChange={handleInputChange}
-              placeholder={"Поиск..."}
-            />
-          ) : (
-            <span className={"p-2 rounded-lg grow"}>
-              {findLabel(value) || "Выбирай"}
-            </span>
-          ))}
-        {multiple && (
-          <SelectChipWrapper viewCountChildren={2}>
-            {value.length ? (
-              value.map((el) => {
-                return (
-                  <SelectChip
-                    key={findValue(el)}
-                    label={findLabel(el)}
-                    onClickRemove={(evt: React.MouseEvent<SVGElement>) => {
-                      evt.stopPropagation();
-                      handleChange(el);
-                    }}
-                  />
-                );
-              })
-            ) : (
-              <span className={"p-2 rounded-lg"}>Выбирай</span>
-            )}
-          </SelectChipWrapper>
-        )}
-
-        {(multiple ? !!value.length : value) && clearOptions && (
-          <button
-            className={
-              "ml-auto bg-transparent border-l-2 px-4 hover:bg-blue-400 hover:text-white"
-            }
-            onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
-              evt.stopPropagation();
-              handleRemoveAllOptions();
-            }}
-          >
-            Вытереть значение
-          </button>
-        )}
-
-        <button
-          className={
-            "ml-auto bg-transparent border-l-2 px-4 rounded-r-lg hover:bg-blue-400 hover:text-white"
-          }
-        >
-          {!open ? "открыть dropdown" : "закрыть dropdown"}
-        </button>
-      </div>
+      {multiple ? (
+        <SelectFieldMultiComponent<T>
+          value={value}
+          handleChange={handleChange}
+          multiple={multiple}
+          findLabel={findLabel}
+          findValue={findValue}
+          search={search}
+          openDropdownToggle={openDropdownToggle}
+          open={open}
+          inputValue={inputValue}
+          handleInputChange={handleInputChange}
+          handleRemoveAllOptions={handleRemoveAllOptions}
+          clearOptions={clearOptions}
+          onChange={onChange}
+        />
+      ) : (
+        <SelectFieldSingleComponent<T>
+          value={value}
+          handleChange={handleChange}
+          multiple={multiple}
+          findLabel={findLabel}
+          findValue={findValue}
+          search={search}
+          openDropdownToggle={openDropdownToggle}
+          open={open}
+          inputValue={inputValue}
+          handleInputChange={handleInputChange}
+          handleRemoveAllOptions={handleRemoveAllOptions}
+          clearOptions={clearOptions}
+          onChange={onChange}
+        />
+      )}
 
       {open && (
         <div

@@ -1,6 +1,7 @@
 import { Select } from "./Select";
 import React, { useState } from "react";
-import { CustomOption } from "./customOption";
+import { CustomOption } from "./customs/CustomOption";
+import { CustomSelectField } from "./customs/CustomSelectField";
 
 export interface CustomOptionProps {
   title: string;
@@ -27,9 +28,7 @@ const options: CustomOptionProps[] = [
 ];
 
 function App() {
-  const [selectValue, setSelectValue] = useState<CustomOptionProps | null>(
-    null,
-  );
+  const [selectValue, setSelectValue] = useState<CustomOptionProps[]>([]);
   const getLabel = (userOption: CustomOptionProps | null): string => {
     if (userOption === null) {
       return "";
@@ -50,13 +49,13 @@ function App() {
     <div className="App">
       <Select
         customOption={(props) => <CustomOption {...props} />}
+        customSelectSingleField={(props) => <CustomSelectField {...props} />}
         value={selectValue}
         getLabel={getLabel}
         getValue={getValue}
         onChange={setSelectValue}
         options={options}
-        search
-        multiple={false}
+        multiple={true}
       />
     </div>
   );
