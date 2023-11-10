@@ -2,8 +2,10 @@ import React from "react";
 import { twMerge } from "tailwind-merge";
 import { SelectOptionProps } from "../model";
 
-export const SelectOption: React.FC<SelectOptionProps> = (props) => {
-  const { multiple, label, active, onClick } = props;
+export const SelectOption = <T extends unknown>(
+  props: SelectOptionProps<T>,
+) => {
+  const { multiple, findLabel, item, active, onClick } = props;
 
   return (
     <div
@@ -14,8 +16,10 @@ export const SelectOption: React.FC<SelectOptionProps> = (props) => {
         active && !multiple && "bg-blue-700 text-white",
       )}
     >
-      {multiple && <input type="checkbox" checked={active} />}
-      <span>{label}</span>
+      {multiple && (
+        <input type="checkbox" defaultChecked={false} checked={active} />
+      )}
+      <span>{findLabel(item)}</span>
     </div>
   );
 };

@@ -2,12 +2,12 @@ import { Select } from "./Select";
 import React, { useState } from "react";
 import { CustomOption } from "./customOption";
 
-interface UserOption {
+export interface CustomOptionProps {
   title: string;
   description: string;
 }
 
-const options: UserOption[] = [
+const options: CustomOptionProps[] = [
   {
     title: "Школа 1",
     description: "Описание школа 1",
@@ -27,8 +27,10 @@ const options: UserOption[] = [
 ];
 
 function App() {
-  const [selectValue, setSelectValue] = useState<UserOption | null>(null);
-  const getLabel = (userOption: UserOption | null): string => {
+  const [selectValue, setSelectValue] = useState<CustomOptionProps | null>(
+    null,
+  );
+  const getLabel = (userOption: CustomOptionProps | null): string => {
     if (userOption === null) {
       return "";
     } else {
@@ -36,7 +38,7 @@ function App() {
     }
   };
 
-  const getValue = (userOption: UserOption | null): string | number => {
+  const getValue = (userOption: CustomOptionProps | null): string | number => {
     if (userOption === null) {
       return "";
     } else {

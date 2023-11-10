@@ -1,13 +1,14 @@
 import { twMerge } from "tailwind-merge";
 import React from "react";
 import { SelectOptionProps } from "./model";
-interface CustomOptionProps extends SelectOptionProps {
+
+interface CustomOptionProps {
   title: string;
   description: string;
 }
 
-export const CustomOption: React.FC<CustomOptionProps> = (props) => {
-  const { onClick, active } = props;
+export const CustomOption = (props: SelectOptionProps<CustomOptionProps>) => {
+  const { onClick, item, active } = props;
   return (
     <div
       onClick={onClick}
@@ -18,10 +19,10 @@ export const CustomOption: React.FC<CustomOptionProps> = (props) => {
     >
       <div className={"p-4 bg-green-400 rounded-full self-center"}></div>
       <div className={"flex flex-col justify-between"}>
-        <span>{props.title}</span>
-        <span>{props.description}</span>
+        <span>{item.title}</span>
+        <span>{item.description}</span>
       </div>
-      <input type="checkbox" checked={active} />
+      <input type="checkbox" defaultChecked={false} checked={active} />
     </div>
   );
 };

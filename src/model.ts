@@ -1,6 +1,7 @@
-export interface SelectOptionProps {
+export interface SelectOptionProps<T> {
   multiple?: boolean;
-  label: string;
+  item: T;
+  findLabel: (option: T) => string;
   active?: boolean;
   onClick: VoidFunction;
 }

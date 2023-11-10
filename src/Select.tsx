@@ -16,7 +16,7 @@ type SelectProps<T> = {
   search?: boolean;
   getLabel?: (value: T | null) => string;
   getValue?: (value: T | null) => string | number;
-  customOption?: React.FC<SelectOptionProps & T>;
+  customOption?: React.FC<SelectOptionProps<T>>;
   clearOptions?: boolean;
 } & (
   | {
@@ -169,6 +169,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
         {!multiple &&
           (search ? (
             <input
+              defaultChecked={false}
               onClick={(evt: React.MouseEvent<HTMLInputElement>) =>
                 open && evt.stopPropagation()
               }
@@ -188,6 +189,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
               value.map((el) => {
                 return (
                   <SelectChip
+                    key={findValue(el)}
                     label={findLabel(el)}
                     onClickRemove={(evt: React.MouseEvent<SVGElement>) => {
                       evt.stopPropagation();
@@ -241,12 +243,13 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
               };
 
               return (
-                <OptionComponent
+                <OptionComponent<T>
+                  key={findValue(option)}
+                  findLabel={findLabel}
                   onClick={handleSelectChange}
-                  label={findLabel(option)}
+                  item={option}
                   multiple={multiple}
                   active={activeOption(option)}
-                  {...option}
                 />
               );
             })
