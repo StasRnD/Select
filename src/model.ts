@@ -7,8 +7,8 @@ export interface SelectOptionProps<T> {
   active?: boolean;
   onClick: VoidFunction;
   selectHasCustomOption?: boolean;
-  leftItem?: React.FC<{ item: T; active: boolean | undefined }> | null;
-  rightItem?: React.FC<{ item: T; active: boolean | undefined }> | null;
+  LeftItem?: React.FC<{ item: T; active: boolean | undefined }>;
+  RightItem?: React.FC<{ item: T; active: boolean | undefined }>;
   withCheckbox?: boolean;
 }
 

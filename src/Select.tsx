@@ -30,11 +30,11 @@ type SelectProps<T> = {
   selectOptionLeftItem?: React.FC<{
     item: T;
     active: boolean | undefined;
-  }> | null;
+  }>;
   selectOptionRightItem?: React.FC<{
     item: T;
     active: boolean | undefined;
-  }> | null;
+  }>;
 } & (SingleSelect<T> | MultiSelect<T>);
 
 const toLowerCaseAndTrim = (value: string): string => {
@@ -214,8 +214,8 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
                   multiple={multiple}
                   active={activeOption(option)}
                   selectHasCustomOption={!!customOption}
-                  leftItem={selectOptionLeftItem}
-                  rightItem={selectOptionRightItem}
+                  LeftItem={selectOptionLeftItem}
+                  RightItem={selectOptionRightItem}
                   withCheckbox={optionWithCheckbox}
                 />
               );

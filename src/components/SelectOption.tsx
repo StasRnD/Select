@@ -8,15 +8,15 @@ export const SelectOption = <T extends unknown>(
   const {
     multiple,
     selectHasCustomOption,
-    leftItem,
-    rightItem,
+    LeftItem,
+    RightItem,
     findLabel,
     item,
     active,
     onClick,
     withCheckbox,
   } = props;
-  const [LeftItem, RightItem] = [leftItem, rightItem];
+
   return (
     <div
       onClick={onClick}
