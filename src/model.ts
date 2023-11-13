@@ -6,6 +6,10 @@ export interface SelectOptionProps<T> {
   findLabel: (option: T) => string;
   active?: boolean;
   onClick: VoidFunction;
+  selectHasCustomOption?: boolean;
+  leftItem?: React.FC<{ item: T; active: boolean | undefined }> | null;
+  rightItem?: React.FC<{ item: T; active: boolean | undefined }> | null;
+  withCheckbox?: boolean;
 }
 
 export interface MultiSelect<T> {

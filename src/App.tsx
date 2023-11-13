@@ -48,14 +48,13 @@ function App() {
   return (
     <div className="App">
       <Select
-        customOption={(props) => <CustomOption {...props} />}
-        customSelectSingleField={(props) => <CustomSelectField {...props} />}
         value={selectValue}
         getLabel={getLabel}
         getValue={getValue}
         onChange={setSelectValue}
         options={options}
         multiple={true}
+        optionWithCheckbox
       />
     </div>
   );

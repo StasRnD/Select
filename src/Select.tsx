@@ -26,6 +26,15 @@ type SelectProps<T> = {
   customSelectSingleField?: React.FC<SelectFieldSingleProps<T>>;
   customSelectMultiField?: React.FC<SelectFieldMultipleProps<T>>;
   clearOptions?: boolean;
+  optionWithCheckbox?: boolean;
+  selectOptionLeftItem?: React.FC<{
+    item: T;
+    active: boolean | undefined;
+  }> | null;
+  selectOptionRightItem?: React.FC<{
+    item: T;
+    active: boolean | undefined;
+  }> | null;
 } & (SingleSelect<T> | MultiSelect<T>);
 
 const toLowerCaseAndTrim = (value: string): string => {
@@ -46,6 +55,9 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
     clearOptions,
     customSelectSingleField,
     customSelectMultiField,
+    selectOptionLeftItem,
+    selectOptionRightItem,
+    optionWithCheckbox,
   } = props;
 
   const ref = useRef<HTMLDivElement>(null);
@@ -201,6 +213,10 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
                   item={option}
                   multiple={multiple}
                   active={activeOption(option)}
+                  selectHasCustomOption={!!customOption}
+                  leftItem={selectOptionLeftItem}
+                  rightItem={selectOptionRightItem}
+                  withCheckbox={optionWithCheckbox}
                 />
               );
             })
