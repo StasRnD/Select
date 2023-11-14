@@ -8,11 +8,12 @@ import React, {
 import { useOutsideClick } from "./hooks";
 import { SelectOption } from "./components/SelectOption";
 import {
+  OptionSelectAll,
   SelectFieldMultipleProps,
   SelectFieldSingleProps,
   SelectOptionProps,
 } from "./model";
-import { checkValue, checkLabel } from "./utils";
+import { checkValue, checkLabel, combinedOptions } from "./utils";
 import { SingleSelect, MultiSelect } from "./model";
 import { SelectFieldMultiple } from "./components/SelectFieldMultiple";
 import { SelectFieldSingle } from "./components/SelectFieldSingle";
@@ -22,19 +23,20 @@ type SelectProps<T> = {
   search?: boolean;
   getLabel?: (value: T | null) => string;
   getValue?: (value: T | null) => string | number;
-  customOption?: React.FC<SelectOptionProps<T>>;
-  customSelectSingleField?: React.FC<SelectFieldSingleProps<T>>;
-  customSelectMultiField?: React.FC<SelectFieldMultipleProps<T>>;
+  CustomOption?: React.FC<SelectOptionProps<T>>;
+  CustomSelectSingleField?: React.FC<SelectFieldSingleProps<T>>;
+  CustomSelectMultiField?: React.FC<SelectFieldMultipleProps<T>>;
   clearOptions?: boolean;
   optionWithCheckbox?: boolean;
-  selectOptionLeftItem?: React.FC<{
+  SelectOptionLeftSlot?: React.FC<{
     item: T;
     active: boolean | undefined;
   }>;
-  selectOptionRightItem?: React.FC<{
+  SelectOptionRightSlot?: React.FC<{
     item: T;
     active: boolean | undefined;
   }>;
+  viewCountChildren?: number;
 } & (SingleSelect<T> | MultiSelect<T>);
 
 const toLowerCaseAndTrim = (value: string): string => {
@@ -45,7 +47,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
 ) => {
   const {
     options,
-    customOption,
+    CustomOption,
     multiple,
     value,
     onChange,
@@ -53,11 +55,12 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
     getLabel,
     getValue,
     clearOptions,
-    customSelectSingleField,
-    customSelectMultiField,
-    selectOptionLeftItem,
-    selectOptionRightItem,
+    CustomSelectSingleField,
+    CustomSelectMultiField,
+    SelectOptionLeftSlot,
+    SelectOptionRightSlot,
     optionWithCheckbox,
+    viewCountChildren,
   } = props;
 
   const ref = useRef<HTMLDivElement>(null);
@@ -85,17 +88,6 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
     }
     setInputValue(evt.target.value);
   };
-
-  const filterOptions = useMemo(() => {
-    return !search || findLabel(!multiple ? value : null) === inputValue
-      ? options
-      : options.filter((option) => {
-          return toLowerCaseAndTrim(findLabel(option)).includes(
-            toLowerCaseAndTrim(inputValue),
-          );
-        });
-  }, [search, findLabel, multiple, value, inputValue, options]);
-
   //Массив строк - лейблы выбранных options
   const allActiveOptions = useMemo(() => {
     return multiple
@@ -107,6 +99,30 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
         )
       : null;
   }, [findValue, multiple, value]);
+
+  const activeAndInactiveOptions = combinedOptions({
+    options,
+    findValue,
+    allActiveOptions,
+  });
+
+  const filterOptions = useMemo(() => {
+    return !search || (!multiple && findLabel(value) === inputValue)
+      ? multiple
+        ? [
+            ...activeAndInactiveOptions.activeOptions,
+            ...activeAndInactiveOptions.inActiveOptions,
+          ]
+        : options
+      : (multiple
+          ? [...activeAndInactiveOptions.inActiveOptions]
+          : options
+        ).filter((option) => {
+          return toLowerCaseAndTrim(findLabel(option)).includes(
+            toLowerCaseAndTrim(inputValue),
+          );
+        });
+  }, [search, findLabel, multiple, value, inputValue, options]);
 
   //Ф-я возвращает true, если label переданного option есть в выбранных options (переменная allActiveOption)
   const activeOption = (option: T): boolean => {
@@ -139,21 +155,35 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
     }
   };
 
+  const handleClickSelectAll = () => {
+    if (multiple) {
+      if (value.length === options.length) {
+        onChange([]);
+      } else {
+        onChange([
+          ...activeAndInactiveOptions.activeOptions,
+          ...activeAndInactiveOptions.inActiveOptions,
+        ]);
+      }
+    }
+  };
+
+  const OptionComponent = CustomOption ?? SelectOption;
+
+  const SelectFieldSingleComponent =
+    CustomSelectSingleField ?? SelectFieldSingle;
+  const SelectFieldMultiComponent =
+    CustomSelectMultiField ?? SelectFieldMultiple;
+
   useEffect(() => {
     if (!multiple) {
       setInputValue(findLabel(value));
+    } else {
+      setInputValue("");
     }
   }, [search, value, multiple, findLabel]);
 
   useOutsideClick(ref, () => setOpen(false));
-
-  const OptionComponent = customOption ?? SelectOption;
-
-  const SelectFieldSingleComponent =
-    customSelectSingleField ?? SelectFieldSingle;
-  const SelectFieldMultiComponent =
-    customSelectMultiField ?? SelectFieldMultiple;
-  console.log(!!customSelectSingleField);
   return (
     <div ref={ref} className={"flex flex-col gap-x-y relative"}>
       {multiple ? (
@@ -171,6 +201,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
           handleRemoveAllOptions={handleRemoveAllOptions}
           clearOptions={clearOptions}
           onChange={onChange}
+          viewCountChildren={viewCountChildren}
         />
       ) : (
         <SelectFieldSingleComponent<T>
@@ -196,6 +227,16 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
             "absolute top-full mt-3 w-full flex flex-col gap-y-3 border p-2 rounded-lg"
           }
         >
+          {multiple && !search && (
+            <SelectOption<OptionSelectAll>
+              item={{ label: "Все", value: "all" }}
+              findLabel={() => "Все"}
+              onClick={handleClickSelectAll}
+              withCheckbox
+              active={value.length === options.length}
+              multiple
+            />
+          )}
           {filterOptions.length ? (
             filterOptions.map((option) => {
               const handleSelectChange = () => {
@@ -213,9 +254,8 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
                   item={option}
                   multiple={multiple}
                   active={activeOption(option)}
-                  selectHasCustomOption={!!customOption}
-                  LeftItem={selectOptionLeftItem}
-                  RightItem={selectOptionRightItem}
+                  LeftSlot={SelectOptionLeftSlot}
+                  RightSlot={SelectOptionRightSlot}
                   withCheckbox={optionWithCheckbox}
                 />
               );

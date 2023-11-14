@@ -46,7 +46,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className={"flex flex-col gap-y-60"}>
       <Select
         value={selectValue}
         getLabel={getLabel}
@@ -55,6 +55,7 @@ function App() {
         options={options}
         multiple={true}
         optionWithCheckbox
+        viewCountChildren={3}
       />
     </div>
   );

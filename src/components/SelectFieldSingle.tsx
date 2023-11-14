@@ -1,5 +1,6 @@
 import React from "react";
 import { SelectFieldSingleProps } from "../model";
+import { SelectSearchInput } from "./SelectSearchInput";
 
 export const SelectFieldSingle = <T extends unknown>(
   props: SelectFieldSingleProps<T>,
@@ -12,6 +13,8 @@ export const SelectFieldSingle = <T extends unknown>(
     handleInputChange,
     findLabel,
     value,
+    handleRemoveAllOptions,
+    clearOptions,
   } = props;
   return (
     <div
@@ -21,21 +24,36 @@ export const SelectFieldSingle = <T extends unknown>(
       }`}
     >
       {search ? (
-        <input
-          defaultChecked={false}
-          onClick={(evt: React.MouseEvent<HTMLInputElement>) =>
-            open && evt.stopPropagation()
-          }
-          className={"focus:outline-0 grow p-2 rounded-lg"}
-          value={inputValue}
-          onChange={handleInputChange}
-          placeholder={"Поиск..."}
+        <SelectSearchInput
+          open={open}
+          inputValue={inputValue}
+          handleInputChange={handleInputChange}
         />
       ) : (
         <span className={"p-2 rounded-lg grow"}>
           {findLabel(value) || "Выбирай"}
         </span>
       )}
+      {value && clearOptions && (
+        <button
+          className={
+            "ml-auto bg-transparent border-l-2 px-4 hover:bg-blue-400 hover:text-white"
+          }
+          onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+            evt.stopPropagation();
+            handleRemoveAllOptions();
+          }}
+        >
+          Вытереть значение
+        </button>
+      )}
+      <button
+        className={
+          "ml-auto bg-transparent border-l-2 px-4 rounded-r-lg hover:bg-blue-400 hover:text-white"
+        }
+      >
+        {!open ? "открыть dropdown" : "закрыть dropdown"}
+      </button>
     </div>
   );
 };

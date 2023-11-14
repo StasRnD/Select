@@ -6,9 +6,8 @@ export interface SelectOptionProps<T> {
   findLabel: (option: T) => string;
   active?: boolean;
   onClick: VoidFunction;
-  selectHasCustomOption?: boolean;
-  LeftItem?: React.FC<{ item: T; active: boolean | undefined }>;
-  RightItem?: React.FC<{ item: T; active: boolean | undefined }>;
+  LeftSlot?: React.FC<{ item: T; active: boolean | undefined }>;
+  RightSlot?: React.FC<{ item: T; active: boolean | undefined }>;
   withCheckbox?: boolean;
 }
 
@@ -34,8 +33,14 @@ type SelectFieldProps<T> = {
   handleInputChange?: (evt: React.ChangeEvent<HTMLInputElement>) => void;
   clearOptions?: boolean;
   handleRemoveAllOptions: VoidFunction;
+  viewCountChildren?: number;
 };
 
 export type SelectFieldSingleProps<T> = SingleSelect<T> & SelectFieldProps<T>;
 
 export type SelectFieldMultipleProps<T> = MultiSelect<T> & SelectFieldProps<T>;
+
+export interface OptionSelectAll {
+  label: "Все";
+  value: "all";
+}

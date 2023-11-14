@@ -2,6 +2,7 @@ import { SelectFieldMultipleProps } from "../model";
 import { SelectChip } from "./SelectChip";
 import React from "react";
 import { SelectChipWrapper } from "./SelectChipWrapper";
+import { twMerge } from "tailwind-merge";
 
 export const SelectFieldMultiple = <T extends unknown>(
   props: SelectFieldMultipleProps<T>,
@@ -15,32 +16,41 @@ export const SelectFieldMultiple = <T extends unknown>(
     openDropdownToggle,
     findValue,
     findLabel,
+    search,
+    inputValue,
+    handleInputChange,
+    viewCountChildren,
   } = props;
 
   return (
     <div
       onClick={openDropdownToggle}
-      className={`flex gap-y-2 border rounded-lg hover:border-blue-600 cursor-pointer ${
-        open && "outline outline-2 outline-blue-400"
-      }`}
+      className={twMerge(
+        "flex gap-y-2 border rounded-lg hover:border-blue-600 cursor-pointer",
+        open && "outline outline-2 outline-blue-400",
+      )}
     >
-      <SelectChipWrapper viewCountChildren={2}>
-        {value.length ? (
-          value.map((el) => {
-            return (
-              <SelectChip
-                key={findValue(el)}
-                label={findLabel(el)}
-                onClickRemove={(evt: React.MouseEvent<SVGElement>) => {
-                  evt.stopPropagation();
-                  handleChange(el);
-                }}
-              />
-            );
-          })
-        ) : (
-          <span className={"p-2 rounded-lg"}>Выбирай</span>
-        )}
+      <SelectChipWrapper
+        search={search}
+        open={open}
+        inputValue={inputValue}
+        handleInputChange={handleInputChange}
+        viewCountChildren={viewCountChildren}
+      >
+        {value.length
+          ? value.map((el) => {
+              return (
+                <SelectChip
+                  key={findValue(el)}
+                  label={findLabel(el)}
+                  onClickRemove={(evt: React.MouseEvent<SVGElement>) => {
+                    evt.stopPropagation();
+                    handleChange(el);
+                  }}
+                />
+              );
+            })
+          : !search && <span className={"p-2 rounded-lg"}>Выбирай</span>}
       </SelectChipWrapper>
 
       {!!value.length && clearOptions && (

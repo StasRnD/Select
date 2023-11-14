@@ -7,9 +7,8 @@ export const SelectOption = <T extends unknown>(
 ) => {
   const {
     multiple,
-    selectHasCustomOption,
-    LeftItem,
-    RightItem,
+    LeftSlot,
+    RightSlot,
     findLabel,
     item,
     active,
@@ -26,16 +25,12 @@ export const SelectOption = <T extends unknown>(
         active && !multiple && "bg-blue-700 text-white",
       )}
     >
-      {!selectHasCustomOption && LeftItem && (
-        <LeftItem item={item} active={active} />
-      )}
+      {LeftSlot && <LeftSlot item={item} active={active} />}
       {withCheckbox && (
         <input type="checkbox" defaultChecked={false} checked={active} />
       )}
       <span>{findLabel(item)}</span>
-      {!selectHasCustomOption && RightItem && (
-        <RightItem item={item} active={active} />
-      )}
+      {RightSlot && <RightSlot item={item} active={active} />}
     </div>
   );
 };

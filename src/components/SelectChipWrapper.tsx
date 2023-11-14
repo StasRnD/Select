@@ -1,15 +1,24 @@
 import React, { PropsWithChildren } from "react";
 import { twMerge } from "tailwind-merge";
+import { SelectSearchInput, SelectSearchInputProps } from "./SelectSearchInput";
 
-interface SelectChipWrapperProps {
+interface SelectChipWrapperProps extends SelectSearchInputProps {
   noWrap?: boolean;
   viewCountChildren?: number;
+  search: boolean | undefined;
 }
 
 export const SelectChipWrapper: React.FC<
   PropsWithChildren<SelectChipWrapperProps>
 > = (props) => {
-  const { children, viewCountChildren = 0, noWrap } = props;
+  const {
+    children,
+
+    viewCountChildren = 2,
+    search,
+    noWrap,
+    ...rest
+  } = props;
   const allChildren = React.Children.toArray(children);
   const childrenCount = allChildren.length;
 
@@ -20,17 +29,25 @@ export const SelectChipWrapper: React.FC<
         noWrap && "flex-nowrap overflow-hidden",
       )}
     >
-      {viewCountChildren ? (
-        <>
-          {allChildren.slice(0, viewCountChildren)}
-          {childrenCount > viewCountChildren && (
-            <div>
-              ...<span>{childrenCount}</span>
-            </div>
-          )}
-        </>
+      {!search ? (
+        children ? (
+          <>
+            {allChildren.slice(0, viewCountChildren)}
+            {childrenCount > viewCountChildren && (
+              <>
+                <span>...</span>
+                <span className={"ml-auto"}>{childrenCount}</span>
+              </>
+            )}
+          </>
+        ) : (
+          <span>Выбирай</span>
+        )
       ) : (
-        children
+        <>
+          {children}
+          <SelectSearchInput {...rest} />
+        </>
       )}
     </div>
   );
