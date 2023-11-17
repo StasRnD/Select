@@ -18,8 +18,13 @@ import { SingleSelect, MultiSelect } from "./model";
 import { SelectFieldMultiple } from "./components/SelectFieldMultiple";
 import { SelectFieldSingle } from "./components/SelectFieldSingle";
 
+type GroupOptions<T> = {
+  groupName: string;
+  groupOptions: T[];
+};
+
 type SelectProps<T> = {
-  options: T[];
+  options: T[] | GroupOptions<T>[];
   search?: boolean;
   getLabel?: (value: T | null) => string;
   getValue?: (value: T | null) => string | number;
@@ -28,8 +33,8 @@ type SelectProps<T> = {
   CustomSelectMultiField?: React.FC<SelectFieldMultipleProps<T>>;
   clearOptions?: boolean;
   optionWithCheckbox?: boolean;
-  groupOptions?: boolean;
-  deletableOptions?: boolean;
+  hasGroupOptions?: boolean;
+  hasDeletableOptions?: boolean;
   showOptionChoseAll?: boolean;
   SelectOptionLeftSlot?: React.FC<{
     item: T;
@@ -49,8 +54,8 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   props: SelectProps<T>,
 ) => {
   const {
-    groupOptions,
-    deletableOptions,
+    hasGroupOptions,
+    hasDeletableOptions,
     options,
     CustomOption,
     multiple,
@@ -72,6 +77,64 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   const ref = useRef<HTMLDivElement>(null);
   const openDropdownToggle = () => setOpen((open) => !open);
   const [open, setOpen] = useState<boolean>(false);
+
+  // @ts-ignore
+  const isGrouped = Array.isArray(options[0]["groupOptions"]);
+
+  // @ts-ignore
+  const flatMapGroupOptions = isGrouped
+    ? // @ts-ignore
+      options.flatMap(({ groupOptions }) => {
+        return groupOptions;
+      })
+    : null;
+
+  const renderGroupOptions = () => {
+    // @ts-ignore
+    return isGrouped
+      ? // @ts-ignore
+        options.map(({ groupName, groupOptions }) => {
+          const activeAndInactiveOptions = combinedOptions({
+            // @ts-ignore
+            options: groupOptions,
+            findValue,
+            allActiveOptions,
+          });
+
+          const viewOptions = () => {
+            if (multiple && hasGroupOptions) {
+              return [
+                ...activeAndInactiveOptions.activeOptions,
+                ...activeAndInactiveOptions.inActiveOptions,
+              ];
+            }
+
+            if (multiple && hasDeletableOptions) {
+              return [...activeAndInactiveOptions.inActiveOptions];
+            }
+
+            return groupOptions;
+          };
+
+          const filterOptions = () => {
+            if (!search || (!multiple && findLabel(value) === inputValue)) {
+              console.log("не фильтр");
+              return viewOptions();
+            }
+            // @ts-ignore
+            return viewOptions().filter((option) => {
+              return toLowerCaseAndTrim(findLabel(option)).includes(
+                toLowerCaseAndTrim(inputValue),
+              );
+            });
+          };
+          return {
+            groupName,
+            groupOptions: filterOptions(),
+          };
+        })
+      : null;
+  };
 
   const findLabel = useCallback(
     (option: T | null): string =>
@@ -107,45 +170,46 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   }, [findValue, multiple, value]);
 
   const activeAndInactiveOptions = combinedOptions({
+    // @ts-ignore
     options,
     findValue,
     allActiveOptions,
   });
 
   const viewOptions = useMemo(() => {
-    if (multiple && groupOptions) {
+    if (multiple && hasGroupOptions) {
       return [
         ...activeAndInactiveOptions.activeOptions,
         ...activeAndInactiveOptions.inActiveOptions,
       ];
     }
 
-    if (multiple && deletableOptions) {
+    if (multiple && hasDeletableOptions) {
       return [...activeAndInactiveOptions.inActiveOptions];
     }
     return options;
   }, [
     activeAndInactiveOptions.activeOptions,
     activeAndInactiveOptions.inActiveOptions,
-    deletableOptions,
-    groupOptions,
+    hasDeletableOptions,
+    hasGroupOptions,
     multiple,
     options,
   ]);
 
-  const filterOptions = useMemo(() => {
-    if (!search || (!multiple && findLabel(value) === inputValue)) {
-      console.log("не фильтр");
-      return viewOptions;
-    }
-
-    return viewOptions.filter((option) => {
-      console.log("фильтр");
-      return toLowerCaseAndTrim(findLabel(option)).includes(
-        toLowerCaseAndTrim(inputValue),
-      );
-    });
-  }, [search, findLabel, multiple, value, inputValue, options]);
+  // const filterOptions = useMemo(() => {
+  //   if (!search || (!multiple && findLabel(value) === inputValue)) {
+  //     console.log("не фильтр");
+  //     return viewOptions;
+  //   }
+  //
+  //   return viewOptions.filter((option) => {
+  //     console.log("фильтр");
+  //     return toLowerCaseAndTrim(findLabel(option)).includes(
+  //       toLowerCaseAndTrim(inputValue),
+  //     );
+  //   });
+  // }, [search, findLabel, multiple, value, inputValue, options]);
 
   //Ф-я возвращает true, если label переданного option есть в выбранных options (переменная allActiveOption)
   const activeOption = (option: T): boolean => {
@@ -180,13 +244,13 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
 
   const handleClickSelectAll = () => {
     if (multiple) {
-      if (value.length === options.length) {
+      if (
+        value.length === (isGrouped ? flatMapGroupOptions : options)?.length
+      ) {
         onChange([]);
       } else {
-        onChange([
-          ...activeAndInactiveOptions.activeOptions,
-          ...activeAndInactiveOptions.inActiveOptions,
-        ]);
+        // @ts-ignore
+        onChange(isGrouped ? flatMapGroupOptions : options);
       }
     }
   };
@@ -201,12 +265,11 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   useEffect(() => {
     if (!multiple) {
       setInputValue(findLabel(value));
-    } else {
-      setInputValue("");
     }
   }, [search, value, multiple, findLabel]);
-
+  console.log(renderGroupOptions());
   useOutsideClick(ref, () => setOpen(false));
+
   return (
     <div ref={ref} className={"flex flex-col gap-x-y relative"}>
       {multiple ? (
@@ -256,36 +319,73 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
               findLabel={() => "Все"}
               onClick={handleClickSelectAll}
               withCheckbox
-              active={value.length === options.length}
+              // @ts-ignore
+              active={
+                value.length ===
+                // @ts-ignore
+                (isGrouped ? flatMapGroupOptions : options).length
+              }
               multiple
             />
           )}
-          {filterOptions.length ? (
-            filterOptions.map((option) => {
-              const handleSelectChange = () => {
-                handleChange(option);
-                if (!multiple) {
-                  openDropdownToggle();
-                }
-              };
-
+          {isGrouped &&
+            renderGroupOptions()?.map(({ groupName, groupOptions }) => {
               return (
-                <OptionComponent<T>
-                  key={findValue(option)}
-                  findLabel={findLabel}
-                  onClick={handleSelectChange}
-                  item={option}
-                  multiple={multiple}
-                  active={activeOption(option)}
-                  LeftSlot={SelectOptionLeftSlot}
-                  RightSlot={SelectOptionRightSlot}
-                  withCheckbox={optionWithCheckbox}
-                />
+                <>
+                  <span>{groupName}</span>
+
+                  {groupOptions.map((option: T) => {
+                    const handleSelectChange = () => {
+                      handleChange(option);
+                      if (!multiple) {
+                        openDropdownToggle();
+                      }
+                    };
+
+                    return (
+                      <OptionComponent<T>
+                        key={findValue(option)}
+                        findLabel={findLabel}
+                        onClick={handleSelectChange}
+                        item={option}
+                        multiple={multiple}
+                        active={activeOption(option)}
+                        LeftSlot={SelectOptionLeftSlot}
+                        RightSlot={SelectOptionRightSlot}
+                        withCheckbox={optionWithCheckbox}
+                      />
+                    );
+                  })}
+                </>
               );
-            })
-          ) : (
-            <p>Ничего не найдено</p>
-          )}
+            })}
+
+          {/*{filterOptions.length ? (*/}
+          {/*  filterOptions.map((option) => {*/}
+          {/*    const handleSelectChange = () => {*/}
+          {/*      handleChange(option);*/}
+          {/*      if (!multiple) {*/}
+          {/*        openDropdownToggle();*/}
+          {/*      }*/}
+          {/*    };*/}
+
+          {/*    return (*/}
+          {/*      <OptionComponent<T>*/}
+          {/*        key={findValue(option)}*/}
+          {/*        findLabel={findLabel}*/}
+          {/*        onClick={handleSelectChange}*/}
+          {/*        item={option}*/}
+          {/*        multiple={multiple}*/}
+          {/*        active={activeOption(option)}*/}
+          {/*        LeftSlot={SelectOptionLeftSlot}*/}
+          {/*        RightSlot={SelectOptionRightSlot}*/}
+          {/*        withCheckbox={optionWithCheckbox}*/}
+          {/*      />*/}
+          {/*    );*/}
+          {/*  })*/}
+          {/*) : (*/}
+          {/*  <p>Ничего не найдено</p>*/}
+          {/*)}*/}
         </div>
       )}
     </div>

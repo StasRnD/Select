@@ -3,45 +3,71 @@ import React, { useState } from "react";
 import { CustomOption } from "./customs/CustomOption";
 import { CustomSelectField } from "./customs/CustomSelectField";
 
-export interface CustomOptionProps {
-  title: string;
-  description: string;
+interface colourOptionsProps {
+  value: string;
+  label: string;
+  color: string;
 }
+const colourOptions: colourOptionsProps[] = [
+  { value: "ocean", label: "Ocean", color: "#00B8D9" },
+  { value: "blue", label: "Blue", color: "#0052CC" },
+  { value: "purple", label: "Purple", color: "#5243AA" },
+  { value: "red", label: "Red", color: "#FF5630" },
+  { value: "orange", label: "Orange", color: "#FF8B00" },
+  { value: "yellow", label: "Yellow", color: "#FFC400" },
+  { value: "green", label: "Green", color: "#36B37E" },
+  { value: "forest", label: "Forest", color: "#00875A" },
+  { value: "slate", label: "Slate", color: "#253858" },
+  { value: "silver", label: "Silver", color: "#666666" },
+];
 
-const options: CustomOptionProps[] = [
+interface flavourOptionsProps {
+  value: string;
+  label: string;
+  rating: string;
+}
+const flavourOptions: flavourOptionsProps[] = [
+  { value: "vanilla", label: "Vanilla", rating: "safe" },
+  { value: "chocolate", label: "Chocolate", rating: "good" },
+  { value: "strawberry", label: "Strawberry", rating: "wild" },
+];
+
+interface groupedOptionsProps {
+  groupName: string;
+  groupOptions: colourOptionsProps[] | flavourOptionsProps[];
+}
+const groupedOptions: groupedOptionsProps[] = [
   {
-    title: "Школа 1",
-    description: "Описание школа 1",
+    groupName: "Colours",
+    groupOptions: colourOptions,
   },
   {
-    title: "Школа 2",
-    description: "Описание школа 2",
-  },
-  {
-    title: "Школа 3",
-    description: "Описание школа 3",
-  },
-  {
-    title: "Школа 4",
-    description: "Описание школа 4",
+    groupName: "Flavours",
+    groupOptions: flavourOptions,
   },
 ];
 
 function App() {
-  const [selectValue, setSelectValue] = useState<CustomOptionProps[]>([]);
-  const getLabel = (userOption: CustomOptionProps | null): string => {
+  const [selectValue, setSelectValue] = useState<
+    (colourOptionsProps | flavourOptionsProps)[]
+  >([]);
+  const getLabel = (
+    userOption: colourOptionsProps | flavourOptionsProps | null,
+  ): string => {
     if (userOption === null) {
       return "";
     } else {
-      return userOption.title;
+      return userOption.label;
     }
   };
 
-  const getValue = (userOption: CustomOptionProps | null): string | number => {
+  const getValue = (
+    userOption: colourOptionsProps | flavourOptionsProps | null,
+  ): string | number => {
     if (userOption === null) {
       return "";
     } else {
-      return userOption.description;
+      return userOption.value;
     }
   };
 
@@ -52,13 +78,9 @@ function App() {
         getLabel={getLabel}
         getValue={getValue}
         onChange={setSelectValue}
-        options={options}
+        options={groupedOptions}
         multiple={true}
-        optionWithCheckbox
-        viewCountChildren={3}
-        deletableOptions
-        showOptionChoseAll
-        search
+        hasGroupOptions
       />
     </div>
   );
