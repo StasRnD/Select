@@ -28,6 +28,9 @@ type SelectProps<T> = {
   CustomSelectMultiField?: React.FC<SelectFieldMultipleProps<T>>;
   clearOptions?: boolean;
   optionWithCheckbox?: boolean;
+  groupOptions?: boolean;
+  deletableOptions?: boolean;
+  showOptionChoseAll?: boolean;
   SelectOptionLeftSlot?: React.FC<{
     item: T;
     active: boolean | undefined;
@@ -46,6 +49,8 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
   props: SelectProps<T>,
 ) => {
   const {
+    groupOptions,
+    deletableOptions,
     options,
     CustomOption,
     multiple,
@@ -61,6 +66,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
     SelectOptionRightSlot,
     optionWithCheckbox,
     viewCountChildren,
+    showOptionChoseAll,
   } = props;
 
   const ref = useRef<HTMLDivElement>(null);
@@ -106,22 +112,39 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
     allActiveOptions,
   });
 
+  const viewOptions = useMemo(() => {
+    if (multiple && groupOptions) {
+      return [
+        ...activeAndInactiveOptions.activeOptions,
+        ...activeAndInactiveOptions.inActiveOptions,
+      ];
+    }
+
+    if (multiple && deletableOptions) {
+      return [...activeAndInactiveOptions.inActiveOptions];
+    }
+    return options;
+  }, [
+    activeAndInactiveOptions.activeOptions,
+    activeAndInactiveOptions.inActiveOptions,
+    deletableOptions,
+    groupOptions,
+    multiple,
+    options,
+  ]);
+
   const filterOptions = useMemo(() => {
-    return !search || (!multiple && findLabel(value) === inputValue)
-      ? multiple
-        ? [
-            ...activeAndInactiveOptions.activeOptions,
-            ...activeAndInactiveOptions.inActiveOptions,
-          ]
-        : options
-      : (multiple
-          ? [...activeAndInactiveOptions.inActiveOptions]
-          : options
-        ).filter((option) => {
-          return toLowerCaseAndTrim(findLabel(option)).includes(
-            toLowerCaseAndTrim(inputValue),
-          );
-        });
+    if (!search || (!multiple && findLabel(value) === inputValue)) {
+      console.log("не фильтр");
+      return viewOptions;
+    }
+
+    return viewOptions.filter((option) => {
+      console.log("фильтр");
+      return toLowerCaseAndTrim(findLabel(option)).includes(
+        toLowerCaseAndTrim(inputValue),
+      );
+    });
   }, [search, findLabel, multiple, value, inputValue, options]);
 
   //Ф-я возвращает true, если label переданного option есть в выбранных options (переменная allActiveOption)
@@ -227,7 +250,7 @@ export const Select = <V, T = V extends V[] ? V[number] : V>(
             "absolute top-full mt-3 w-full flex flex-col gap-y-3 border p-2 rounded-lg"
           }
         >
-          {multiple && !search && (
+          {multiple && showOptionChoseAll && (
             <SelectOption<OptionSelectAll>
               item={{ label: "Все", value: "all" }}
               findLabel={() => "Все"}

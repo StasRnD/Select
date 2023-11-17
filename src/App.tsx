@@ -56,6 +56,9 @@ function App() {
         multiple={true}
         optionWithCheckbox
         viewCountChildren={3}
+        deletableOptions
+        showOptionChoseAll
+        search
       />
     </div>
   );
