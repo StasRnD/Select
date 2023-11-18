@@ -57,7 +57,7 @@ function App() {
     if (userOption === null) {
       return "";
     } else {
-      return userOption.label;
+      return "color" in userOption ? userOption.color : userOption.rating;
     }
   };
 
@@ -80,7 +80,11 @@ function App() {
         onChange={setSelectValue}
         options={groupedOptions}
         multiple={true}
-        hasGroupOptions
+        grouped={true}
+        clearOptions
+        search
+        showOptionChoseAll
+        hasDeletableOptions
       />
     </div>
   );

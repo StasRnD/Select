@@ -14,7 +14,7 @@ export const SelectChipWrapper: React.FC<
   const {
     children,
 
-    viewCountChildren = 2,
+    viewCountChildren,
     search,
     noWrap,
     ...rest
@@ -30,24 +30,24 @@ export const SelectChipWrapper: React.FC<
       )}
     >
       {!search ? (
-        children ? (
-          <>
+        children || viewCountChildren ? (
+          <React.Fragment>
             {allChildren.slice(0, viewCountChildren)}
-            {childrenCount > viewCountChildren && (
-              <>
+            {childrenCount > Number(viewCountChildren) && (
+              <React.Fragment>
                 <span>...</span>
                 <span className={"ml-auto"}>{childrenCount}</span>
-              </>
+              </React.Fragment>
             )}
-          </>
+          </React.Fragment>
         ) : (
           <span>Выбирай</span>
         )
       ) : (
-        <>
+        <React.Fragment>
           {children}
           <SelectSearchInput {...rest} />
-        </>
+        </React.Fragment>
       )}
     </div>
   );
